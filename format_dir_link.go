@@ -15,6 +15,8 @@ func format_dir_link(f_name string) string {
 	log.Print("format_dir_link. f_name is: ", f_name)
 
 	file_n_short := strings.ReplaceAll(f_name, "_", " ")
+	//file_n_short is the human-readable filename in the
+	//head of the link, so we strip out the underscores.
 
 	return fmt.Sprintln("[" + file_n_short + "](" + f_name + "/Index.md)\n")
 

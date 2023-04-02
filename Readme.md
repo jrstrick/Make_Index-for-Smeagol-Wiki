@@ -32,7 +32,9 @@ It will ignore any other files it finds.
 
 - make_index will choke on any filename with spaces in it. I've found the Linux command "detox" prior to running make_index solves this in a suitably automatic fashion.
 
-- make_index will ignore any directory or file whose name is not capitalized. This is so your wiki can have other stuff, like the smeagol.toml file, or perhaps even a code directory, and not have those directories indexed.
+- make_index will ignore any directory whose name is not capitalized. This is so your wiki can have other stuff, like a code directory, without having that directory indexed.
+
+- make_index will ignore any file type it does not explicitly understand. This means you can have things like smeagol.toml where it needs to be and not have it in an index.
 
 - When make_index indexes your image directory, it will put an anchor link rather than an image link to any image that begins with nsfw_ . There are some images you probably don't want popping onto your browser in the coffee shop.
 

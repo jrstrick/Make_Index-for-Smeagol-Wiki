@@ -167,12 +167,12 @@ func gen_index(path string, wg *sync.WaitGroup) {
 	Create the Index.md file and add the AUTOGEN header to it.
 	------------------------------------------------------------*/
 	output_file, err := os.Create(path + "/Index.md")
-	//output_file := os.Stdout
-
 	on_error_die(err, "Unable to create Index.md on "+path)
+	//open the output file. Panic if we fail.
 
 	_, err = io.WriteString(output_file, "---\ntags:\n- AUTOGEN\n---\n\n")
 	on_error_die(err, "Failed writing the header to Index.md on path "+path)
+	//write the output file's tags and AUTOGEN header. Panic if we fail.
 
 	log.Print("opened Index.md in", path)
 
@@ -189,45 +189,58 @@ func gen_index(path string, wg *sync.WaitGroup) {
 
 	directory, err := dir_file_handle.ReadDir(0)
 	on_error_die(err, "Unable to read in "+path)
-
 	//read in the whole directory at path. Panic if we fail
+	//This could get ugly if the directories are big enough.
 
 	sort.Slice(directory,
 		func(i, j int) bool {
 			return directory[i].Name() < directory[j].Name()
 		})
-
 	//Yanno, according to the API, readdir should return the directory already sorted.
 	//We have to sort it by name anyway. Go fig.
 
 	for index := range directory {
 		file := directory[index]
 		file_name_type := strings.Split(file.Name(), ".")
+		//split the filename from the type extention
 
 		log.Print("Processing ", file.Name())
 
 		if file.IsDir() {
+			//do all this if we're dealing with a directory.
+
 			log.Print(file.Name(), " is a directory")
 
 			if (file_name_type[0] != "") &&
 				((unicode.IsUpper(rune(file_name_type[0][0]))) ||
 					(unicode.IsNumber(rune(file_name_type[0][0])))) {
+				//filter the directory name and type for sanity.
+				//the name can not be an empty string.
+				//the name must be capitalized or begin with a number.
+
 				go gen_index(path+"/"+file_name_type[0], wg)
+				//new thread with gen_index at this new directory.
 
 				_, err := io.WriteString(output_file, format_dir_link(file_name_type[0]))
 				on_error_die(err, "Unable to write Directory Link")
+				//write the link to the directory's Index.md. Panic if we fail.
 			}
 
 		} else {
+			//So we're not a directory if we're here.
 
 			switch file_name_type[1] {
+			//file_name_type is a slice with the file name in [0]
+			//and the type extension in [1]. So we're switching on
+			//the type extension.
 
 			case "md":
 				{
-
 					log.Print(file.Name(), " is a Markdown file.")
 					_, err := io.WriteString(output_file, format_mkd_link(file_name_type[0]))
 					on_error_die(err, "Unable to write markdown Link")
+					//write the markdown file link using the fmt_mkd_link function on the file name
+					//without the extension. Panic if the write fails.
 
 				}
 			case "jpg", "gif", "png":
@@ -235,12 +248,16 @@ func gen_index(path string, wg *sync.WaitGroup) {
 					log.Print(file.Name(), " is an image file.")
 					_, err := io.WriteString(output_file, format_img_link(file_name_type[0], file_name_type[1]))
 					on_error_die(err, "Unable to write image Link")
+					//Write the image link using format_image_link and
+					//*both* elements of the file_name_type slice.
+					//Kludge alert.
 				}
 
 			default:
 				{
-
 					log.Print(file.Name(), " is in an unsupported format.")
+					//If we get here, we didn't match any known types.
+					//So we don't write any links. Ignore it and move on.
 				}
 
 			}
@@ -249,8 +266,10 @@ func gen_index(path string, wg *sync.WaitGroup) {
 
 	}
 
-	wg.Done()
 	output_file.Close()
+	//close the output_file.
+
+	wg.Done()
 	return
 	// Lower the wait group by one and return.
 
