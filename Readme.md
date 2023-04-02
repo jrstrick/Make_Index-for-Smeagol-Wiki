@@ -1,4 +1,4 @@
-# Make Index for Smeagol-Wiki
+# Make Index for [Smeagol-Wiki](https://github.com/AustinWise/smeagol)
 
 Got a nice directory tree full of markdown files you want Smeagol-Wiki to use? Want them indexed without having to do it yourself? This is the program for you.
 
