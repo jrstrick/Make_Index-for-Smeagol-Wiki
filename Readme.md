@@ -4,7 +4,9 @@ Got a nice directory tree full of markdown files you want Smeagol-Wiki to use? W
 
 ## To Use:
 
-./make_index [root of your smeagol-wiki directory tree]
+```bash
+$ ./make_index [root of your smeagol-wiki directory tree]
+```
 
 This will recursively dive your Smeagol-Wiki directory tree and create Index.md files in each directory.
 
