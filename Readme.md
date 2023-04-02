@@ -47,3 +47,7 @@ $ go build
 - Q : Why Go? Why not Rust? A: I'm learning Go for another project because it has a mature graphics toolkit. Rust does not. Go is fast *enough* and safe *enough* for this project.
 
 - Q: Why do you document your code so much? A: I'm still learning Go, and in six months, when I'm trying to fix your bug report, those comments will make it possible to recover my thought process when I wrote the code.
+
+- Q: Can you add feature X? A: Maybe. I mostly wrote this for myself. I'm always willing to listen to cool ideas though.
+
+- Q: I'm going to fork this so I can do it right! A: Feel free. If yours is better, I'll probably switch to it. :)
