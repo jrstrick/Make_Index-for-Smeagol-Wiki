@@ -72,7 +72,7 @@ $ cp ./smeagol.toml [root directory of your smeagol-wiki]
 - Function format_X_link(*file_name* string, [*file_type* string]) Location: their own .go files.
   These functions generate the actual link text for each file type. Presently, only format_img_link requires the file_type string. In the future, I may standardize that API. 
   
-  format_img_link is also special in that it does some logic to check to see whether you've named a given image nsfw_whatever, or just nsfw. If you have, it generates an anchor link, so you have to click to open the image. Otherwise, image links in an Index.md file open as images in your browser automatically.
+  format_img_link is also special in that it does some logic to check to see whether you've named a given image nsfw_whatever, or just nsfw. If you have, it generates an anchor link, so you have to click to open the image. Any image not so marked will be linked to open as an image in your browser when you load the Index.md file.
 
 - Function gen_index_preflight(*path* string) Location: gen_index.go
   If the Index.md file at the path given does not exist, or does exist but has an AUTOGEN tag in its YAML header, return true. Otherwise return false.
