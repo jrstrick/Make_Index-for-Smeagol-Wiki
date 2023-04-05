@@ -15,7 +15,7 @@ This will recursively dive your Smeagol-Wiki directory tree and create Index.md 
 
 ## Features:
 
-make_index is multithreaded, using Go's goroutines function. Depending on the size of your directory tree, this may speed things up dramatically.
+make_index is multithreaded, using go-routines. Depending on the size of your directory tree, this may speed things up dramatically.
 
 make_index will refrain from clobbering user-generated Index.md files, or in fact any Index.md file which does not contain the YAML tag: AUTOGEN.
 
@@ -55,10 +55,18 @@ $ cp ./smeagol.toml [root directory of your smeagol-wiki]
 
 ## How it Works
 
-- Function main() Location: main.go 
-  Validates the path you passed make_index. Once the path you passed make_index has been validated, main.go calls the gen_index function in gen_index.go and passes it the validated path.
+- Function main() 
+  Location: main.go 
+  
+  We validate the path you passed make_index. Once the path you passed make_index has been validated, main.go calls the gen_index function in gen_index.go and passes it the validated path.
+  
+  Also make sure the program doesn't terminate before the go-routines are all finished.
+  
+  
 
-- Function gen_index(*path* string) Location: gen_index.go
+- Function gen_index(*path* string) 
+  Location: gen_index.go
+  
   Calls gen_index_preflight with the path gen_index was passed. 
   
   If gen_index_preflight returns true, we create a new Index.md file, and iterate through the directory at the end of our path.
@@ -68,13 +76,19 @@ $ cp ./smeagol.toml [root directory of your smeagol-wiki]
   For any other type of file (determined by the dot-extention) we call one of several format_X_link functions to generate the exact text of the link, and write that to Index.md
   
   When we run out of entries in the directory at the end of our path, we return.
+  
 
-- Function format_X_link(*file_name* string, [*file_type* string]) Location: their own .go files.
+- Function format_X_link(*file_name* string, [*file_type* string]) 
+  Location: their own .go files.
+  
   These functions generate the actual link text for each file type. Presently, only format_img_link requires the file_type string. In the future, I may standardize that API. 
   
   format_img_link is also special in that it does some logic to check to see whether you've named a given image nsfw_whatever, or just nsfw. If you have, it generates an anchor link, so you have to click to open the image. Any image not so marked will be linked to open as an image in your browser when you load the Index.md file.
+  
 
-- Function gen_index_preflight(*path* string) Location: gen_index.go
+- Function gen_index_preflight(*path* string) 
+  Location: gen_index.go
+  
   If the Index.md file at the path given does not exist, or does exist but has an AUTOGEN tag in its YAML header, return true. Otherwise return false.
 
 ## Notes
@@ -87,4 +101,4 @@ $ cp ./smeagol.toml [root directory of your smeagol-wiki]
 
 - Q: I'm going to fork this so I can do it right! A: Feel free. If yours is better, I'll probably switch to it. :)
 
-- 
+- Q: Why go-routines? This should be a proper recursion! A: Because I could. :) Also because recursion chews up stack memory, and why have all those cores sitting idle while one thread does all the work? Also, end state testing in actual recursion seemed harder.
