@@ -24,7 +24,7 @@ Why breaking changes? On chatting with AustinWise, author of smeagol, he pointed
 2. ### The Default Index File Name Has Changed.
    
    By default, make_index now produces README.md files. You can change this, either by passing the -index_file flag on the command line, or by having a smeagol.toml file in your wiki root that sets the index file name —aka index-page—to some other name. 
-
+   
    If you were using the previous version of make_index with smeagol, you already have that smeagol.toml file specifying Index.md as the index file name so smeagol could find the indexes you created. This will continue to work.
 
 ## To Use:
@@ -85,9 +85,9 @@ It will ignore any other files it finds.
 
 - make_index will ignore any directory whose name is not capitalized. This is so your wiki can have other stuff, like a code directory, without having that directory indexed.
 
-- make_index will ignore any file type it does not explicitly understand. This means you can have things like smeagol.toml where it needs to be and not have indexed.
+- make_index will ignore any file type it does not explicitly understand. This means you can have things like smeagol.toml where it needs to be and not have them indexed.
 
-- When make_index indexes your image directory, it will put an anchor link rather than an image link to any image that begins with nsfw_ . There are some images you probably don't want popping onto your browser in the coffee shop.
+- When make_index indexes your image directory, it will put an anchor link rather than an image link to any image that begins with nsfw . There are some images you probably don't want popping onto your browser in the coffee shop.
 
 - make_index is dumb about file types. It goes strictly off the dot extension, so any file with .jpg will be linked as an image, any file with a .md extentson will be linked as a markdown file, and any file with an extension it doesn't know will be ignored. 
 
