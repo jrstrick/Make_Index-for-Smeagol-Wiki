@@ -1,26 +1,33 @@
 # Make Index for [Smeagol(wiki)](https://github.com/AustinWise/smeagol)
-This program exists because I am lazy. I had an entire directory tree full of markdown files, and as a novelist writing in markdown, I generate more. A lot. I wanted to be able to keep track of all my characters, events, and the chapters of the novels in a wiki so I don't go crazy looking up how old my main character was three novels ago in the spring, and what color her cat is. After much searching, I settled on [smeagol(https://github.com/AustinWise/smeagol).
+
+This program exists because I am lazy. I had an entire directory tree full of markdown files, and as a novelist writing in markdown, I generate more. A lot. I wanted to be able to keep track of all my characters, events, and the chapters of the novels in a wiki so I don't go crazy looking up how old my main character was three novels ago in the spring, and what color her cat is. After much searching, I settled on [smeagol](https://github.com/AustinWise/smeagol).
 
 Only one little problem. At that time, smeagol's default response, in light of a missing index file (say, Index.md, for argument) was to do nothing. I wasn't about to write all those dozens of index files by hand, especially in light of how much they change. This program is the result.
 
 This program will go through a directory tree and generate an index file (Index.md, by default) in each subdirectory it finds containing links to all the files in that subdirectory. It will then put links to each index file in each directory in the parent directory's index file, producing a navigable wiki tree.
 
 ## BREAKING CHANGES
+
 ### Parameter system has changed
 
 In the interests of better parameter handling, I switched to Go's flags package instead of parsing the parameters myself the way we did back in the stone age. This did break one feature. Before, you could type 
+
 ```bash
 make_index /home/jim/mywiki
 ```
+
 and make_index would treat the parameter /home/jim/mywiki as the root of the wiki you're trying to index. This no longer works. If you pass make_index parameters this way, they will be ignored.
 
 The new way is to type
+
 ```bash
 make_index -wiki_root /home/jim/wiki
 ```
+
 This makes it much easier to add additional parameters. Which is why I changed it in the first place.
 
 ## MORE BREAKING CHANGES
+
 If you don't have a smeagol.toml file in your wiki root *and* you don't specify an index_file, make_index's new default index file name is README.md, to stay in sync with smeagol's defaults. If you were using the previous version with smeagol, you already have that smeagol.toml file so smeagol could find the indexes you created. Now you have a choice. But it might break things.
 
 ## To Use:
@@ -30,14 +37,17 @@ I recommend stopping smeagol-wiki if it's already running. I haven't *seen* anyt
 ```bash
 $ make_index [OPTIONS]
 ```
+
 ## Option flags:
+
 These flags are all optional, for flexability. By default, make_index will run in the current directory, read from smeagol.toml if it's there, and write Index.md files.
 
-```bash
+```
 -config_file <filename.toml> default: smeagol.toml, ignored if not found.
--index_file <filename.md> default: README.md or whatever's in smeagol.toml
+-index_file <filename.md> default: README.md or whatever is in smeagol.toml
 -wiki_root <path name> default: current directory
 ```
+
 ## Examples
 
 ```bash
@@ -49,7 +59,6 @@ $./make_index -wiki_root ~/home/jim/my_wiki -config_file smeagol.toml -index_fil
 $./make_index -wiki_root ~/home/jim/my_wiki
 //Here, we just tell make_index what the root of the wiki is, and accept smeagol.toml as our config file. If it's there, it will set the index file name to the same thing smeagol is using. Otherwise it will revert to my default, which is Index.md. Yes, I'm entirely aware this is different from smeagol's 
 ```
-
 
 ## Features:
 
