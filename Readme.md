@@ -40,7 +40,7 @@ $ make_index [OPTIONS]
 
 ## Option flags:
 
-These flags are all optional, for flexability. By default, make_index will run in the current directory, read from smeagol.toml if it's there, and write Index.md files.
+These flags are all optional, for flexability. By default, make_index will run in the current directory, read from smeagol.toml if it's there, and write README.md files. unless otherwise specified in smeagol.toml.
 
 ```
 -config_file <filename.toml> default: smeagol.toml, ignored if not found.
@@ -51,13 +51,17 @@ These flags are all optional, for flexability. By default, make_index will run i
 ## Examples
 
 ```bash
-$./make_index -wiki_root ~/home/jim/my_wiki -config_file smeagol.toml -index_file Index.md
-//Here, we explicitly tell make_index where the wiki root is, what config file to load when it gets there, and //what file name to use when generating the index files.
+$./make_index -wiki_root ~/home/jim/my_wiki -config_file notsmeagol.toml -index_file Index.md
+//Here, we explicitly tell make_index where the wiki root is,what config file to load when it 
+//gets there, and what file name to use when generating the index files.
 
 //or
 
 $./make_index -wiki_root ~/home/jim/my_wiki
-//Here, we just tell make_index what the root of the wiki is, and accept smeagol.toml as our config file. If it's there, it will set the index file name to the same thing smeagol is using. Otherwise it will revert to my default, which is Index.md. Yes, I'm entirely aware this is different from smeagol's 
+//Here, we just tell make_index what the root of the wiki is, and accept smeagol.toml as 
+//our config file. 
+//If smeagol.toml is there, make_index will set the index file name to the same thing 
+//smeagol is using. Otherwise it will revert to the default used by smeagol: README.md 
 ```
 
 ## Features:
