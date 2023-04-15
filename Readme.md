@@ -85,7 +85,7 @@ It will ignore any other files it finds.
 
 - make_index will ignore any directory whose name is not capitalized. This is so your wiki can have other stuff, like a code directory, without having that directory indexed.
 
-- make_index will ignore any file type it does not explicitly understand. This means you can have things like smeagol.toml where it needs to be and not have them indexed.
+- make_index will ignore any file type it does not explicitly understand. This means you can have things like smeagol.toml where they need to be and not have them indexed.
 
 - When make_index indexes your image directory, it will put an anchor link rather than an image link to any image that begins with nsfw . There are some images you probably don't want popping onto your browser in the coffee shop.
 
