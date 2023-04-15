@@ -28,19 +28,19 @@ func on_error_die(err error, text string) {
 	}
 
 }
-func gen_index_preflight(path string) bool {
+func gen_index_preflight(path string, index_file_name string) bool {
 
 	/*----------------------------------------------------------------
-		Called by gen_index, this function checks to see if an Index.md file
+		Called by gen_index, this function checks to see if an index_file_name file
 		exists in the current path.
 
 		If it does not:
 		we pass preflight
 
-		If Index.md exists, but the first YAML header tag is AUTOGEN:
+		If index_file_name exists, but the first YAML header tag is AUTOGEN:
 		we pass preflight
 
-		Otherwise, we have a user-generated Index.md, and our user will
+		Otherwise, we have a user-generated index_file_name, and our user will
 		not likely appreciate it being clobbered.
 	------------------------------------------------------------------*/
 
@@ -56,23 +56,23 @@ func gen_index_preflight(path string) bool {
 	log.Print("gen_index_preflight called at: ", path)
 	// Log that we're running. This logic has been a PITA.
 
-	file_bytes, file_open_error := os.ReadFile(path + "/Index.md")
-	//Try to open Index.md and read the whole thing into file_bytes.
+	file_bytes, file_open_error := os.ReadFile(path + "/" + index_file_name)
+	//Try to open index_file_name and read the whole thing into file_bytes.
 
 	if file_open_error == nil {
 		// If we didn't get an error reading the file, it exists.
 
-		log.Print("Index.md exists on ", path)
+		log.Print(index_file_name+" exists on ", path)
 		// Log that fact.
 
 		frontmatter.Parse(strings.NewReader(string(file_bytes)), &front_matter)
-		//Parse the YAML frontmatter from the Index.md file into the front_matter struct.
+		//Parse the YAML frontmatter from the index_file_name file into the front_matter struct.
 
 		if len(front_matter.Tags) == 0 {
 			// This is a sanity check, for file with no tags: tags or no valid YAML
 			// header. If we hit that, we're in unknown waters, so fail the preflight.
 
-			log.Print("Failed preflight: Index.md found, but it contains no tags.")
+			log.Print("Failed preflight: " + index_file_name + " found, but it contains no tags.")
 			// Log that fact
 
 			return false
@@ -84,57 +84,58 @@ func gen_index_preflight(path string) bool {
 
 		if front_matter.Tags[0] != "AUTOGEN" {
 			log.Print("No AUTOGEN tag in header")
-			//If there's an Index.md file without an AUTOGEN tag at the beginning
+			//If there's an index_file_name file without an AUTOGEN tag at the beginning
 			//we fail preflight.
 
-			log.Print("Failed preflight: Index.md with no AUTOGEN flag.")
+			log.Print("Failed preflight: " + index_file_name + " with no AUTOGEN flag.")
 
 			return false
 			//short-circuit the rest of the function and return false right now.
 
 		} else {
-			//If we're here, there's an Index.md file WITH an AUTOGEN tag at the beginning
+			//If we're here, there's an index_file_name file WITH an AUTOGEN tag at the beginning
 			//so we pass preflight.
 
-			log.Print("Passed Preflight. There is an Index.md, but it AUTOGEN. Clobber away.")
+			log.Print("Passed Preflight. There is an " + index_file_name + ", but it AUTOGEN. Clobber away.")
 		}
 
 	} else {
-		//If we're here, there was no Index.md file (or some other file error happend. eek)
+		//If we're here, there was no index_file_name file (or some other file error happend. eek)
 		//so we pass preflight. Just fall through to the main return.
 
-		log.Print("No Index.md found.")
+		log.Print("No " + index_file_name + " found.")
 		//Log that fact.
 
 	}
 
 	return true
-	//Either there is no Index.md file on this path, or it has the AUTOGEN tag.
+	//Either there is no index_file_name file on this path, or it has the AUTOGEN tag.
 	//Return true.
 }
 
-func gen_index(path string, wg *sync.WaitGroup) {
+func gen_index(path string, index_file_name string, wg *sync.WaitGroup) {
 	/*-----------------------------------------------------------------
 	This is the function that does all the heavy lifting.
 
 	We are probably in our own thread, so increase the waitgroup value by 1.
 
 	If we pass the preflight check:
-		Create the Index.md file.
+		Create the index_file_name file.
+		Defer closing it.
+
 		Write a YAML header with at least a tags: entry and the AUTOGEN tag.
 
 		Iterate through the files in this path.
 			If it's a directory:
 				kick a new go thread with path+our filename.
-				process the directory name into our CURRENT Index.md
-				as a link to the subdirectory's Index.md.
+				process the directory name into our CURRENT index_file_name
+				as a link to the subdirectory's index_file_name.
 
 			Else
 				Process the filename by type into a link in our current
-				Index.md file. Index.md should be ignored, since we handle
+				index_file_name file. index_file_name should be ignored, since we handle
 				it separately. Kludgy.
 
-		Close Index.md.
 
 	Decrease the waitgroup value by 1.
 	Aaaand we're done.
@@ -142,6 +143,7 @@ func gen_index(path string, wg *sync.WaitGroup) {
 
 	log.Print("gen_index called at path ", path)
 	//Log that we're running. It gets hinky when we're multithreaded.
+	log.Print("index_file_name presently: ", index_file_name)
 
 	wg.Add(1)
 	//Increase the waitgroup by 1 for this thread.
@@ -150,10 +152,10 @@ func gen_index(path string, wg *sync.WaitGroup) {
 	Pre-flight check the directory in path
 	-------------------------------------------------------------------*/
 
-	if !gen_index_preflight(path) {
-		// If path contains an Index.md file that's not tagged AUTOGEN,
+	if !gen_index_preflight(path, index_file_name) {
+		// If path contains an index_file_name file that's not tagged AUTOGEN,
 
-		log.Print("Preflight Check Failed:", path+"/Index.md")
+		log.Print("Preflight Check Failed:", path+"/"+index_file_name)
 		// Log that fact
 
 		wg.Done()
@@ -164,20 +166,23 @@ func gen_index(path string, wg *sync.WaitGroup) {
 	//If we get to this point in a given run, we passed the preflight check.
 
 	/*-----------------------------------------------------------
-	Create the Index.md file and add the AUTOGEN header to it.
+	Create the index_file_name file and add the AUTOGEN header to it.
 	------------------------------------------------------------*/
-	output_file, err := os.Create(path + "/Index.md")
-	on_error_die(err, "Unable to create Index.md on "+path)
+	output_file, err := os.Create(path + "/" + index_file_name)
+	on_error_die(err, "Unable to create "+index_file_name+" on "+path)
 	//open the output file. Panic if we fail.
 
+	defer output_file.Close()
+	//close the output_file when this function exits.
+
 	_, err = io.WriteString(output_file, "---\ntags:\n- AUTOGEN\n---\n\n")
-	on_error_die(err, "Failed writing the header to Index.md on path "+path)
+	on_error_die(err, "Failed writing the header to "+index_file_name+" on path "+path)
 	//write the output file's tags and AUTOGEN header. Panic if we fail.
 
-	log.Print("opened Index.md in", path)
+	log.Print("opened "+index_file_name+" in", path)
 
 	/*----------------------------------------------------------
-	Populate the Index.md file
+	Populate the index_file_name file
 	-----------------------------------------------------------*/
 
 	log.Print("Passed Preflight Check")
@@ -218,12 +223,12 @@ func gen_index(path string, wg *sync.WaitGroup) {
 				//the name can not be an empty string.
 				//the name must be capitalized or begin with a number.
 
-				go gen_index(path+"/"+file_name_type[0], wg)
+				go gen_index(path+"/"+file_name_type[0], index_file_name, wg)
 				//new thread with gen_index at this new directory.
 
-				_, err := io.WriteString(output_file, format_dir_link(file_name_type[0]))
+				_, err := io.WriteString(output_file, format_dir_link(file_name_type[0], index_file_name))
 				on_error_die(err, "Unable to write Directory Link")
-				//write the link to the directory's Index.md. Panic if we fail.
+				//write the link to the directory's index_file_name. Panic if we fail.
 			}
 
 		} else {
@@ -265,9 +270,6 @@ func gen_index(path string, wg *sync.WaitGroup) {
 		}
 
 	}
-
-	output_file.Close()
-	//close the output_file.
 
 	wg.Done()
 	return

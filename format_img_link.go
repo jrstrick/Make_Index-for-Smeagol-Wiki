@@ -22,7 +22,7 @@ func format_img_link(f_name string, f_type string) string {
 	if strings.Split(f_name, "_")[0] != "nsfw" {
 		return_string = "↓ " + file_name_string + "\n" + fmt.Sprintln("!["+file_name_string+"]("+file_name_string+")\n")
 		//put the filename for the image below, with an arrow.
-		//the image index is most useful for writing your own Index.md files.
+		//the image index is most useful for writing your own index_file_name files.
 	} else {
 		//Sometimes there are images we don't want to auto-load. So instead,
 		//we strip the filename of its underscores and create a standard anchor link to it.

@@ -1,3 +1,3 @@
-# Smeagol-wiki does not use Index.md as its default index file name.
+# Smeagol-wiki does not use index_file_name as its default index file name.
 # this command fixes that.
 index-page = "Index"

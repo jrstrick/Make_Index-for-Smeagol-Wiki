@@ -1,23 +1,63 @@
-# Make Index for [Smeagol-Wiki](https://github.com/AustinWise/smeagol)
+# Make Index for [Smeagol(wiki)](https://github.com/AustinWise/smeagol)
+This program exists because I am lazy. I had an entire directory tree full of markdown files, and as a novelist writing in markdown, I generate more. A lot. I wanted to be able to keep track of all my characters, events, and the chapters of the novels in a wiki so I don't go crazy looking up how old my main character was three novels ago in the spring, and what color her cat is. After much searching, I settled on [smeagol(https://github.com/AustinWise/smeagol).
 
-Got a nice directory tree full of markdown files you want Smeagol-Wiki to use? Want them indexed without having to do it yourself? This is the program for you.
+Only one little problem. At that time, smeagol's default response, in light of a missing index file (say, Index.md, for argument) was to do nothing. I wasn't about to write all those dozens of index files by hand, especially in light of how much they change. This program is the result.
+
+This program will go through a directory tree and generate an index file (Index.md, by default) in each subdirectory it finds containing links to all the files in that subdirectory. It will then put links to each index file in each directory in the parent directory's index file, producing a navigable wiki tree.
+
+## BREAKING CHANGES
+### Parameter system has changed
+
+In the interests of better parameter handling, I switched to Go's flags package instead of parsing the parameters myself the way we did back in the stone age. This did break one feature. Before, you could type 
+```bash
+make_index /home/jim/mywiki
+```
+and make_index would treat the parameter /home/jim/mywiki as the root of the wiki you're trying to index. This no longer works. If you pass make_index parameters this way, they will be ignored.
+
+The new way is to type
+```bash
+make_index -wiki_root /home/jim/wiki
+```
+This makes it much easier to add additional parameters. Which is why I changed it in the first place.
+
+## MORE BREAKING CHANGES
+If you don't have a smeagol.toml file in your wiki root *and* you don't specify an index_file, make_index's new default index file name is README.md, to stay in sync with smeagol's defaults. If you were using the previous version with smeagol, you already have that smeagol.toml file so smeagol could find the indexes you created. Now you have a choice. But it might break things.
 
 ## To Use:
 
 I recommend stopping smeagol-wiki if it's already running. I haven't *seen* anything bad happen if I reindex the wiki while the server is running, but it seems unwise anyway.
 
 ```bash
-$ make_index [root of your smeagol-wiki directory tree]
-$ ~/.cargo/bin/smeagol-wiki --host 0.0.0.0 --fs [root of your smeagol-wiki directory tree]
+$ make_index [OPTIONS]
+```
+## Option flags:
+These flags are all optional, for flexability. By default, make_index will run in the current directory, read from smeagol.toml if it's there, and write Index.md files.
+
+```bash
+-config_file <filename.toml> default: smeagol.toml, ignored if not found.
+-index_file <filename.md> default: README.md or whatever's in smeagol.toml
+-wiki_root <path name> default: current directory
+```
+## Examples
+
+```bash
+$./make_index -wiki_root ~/home/jim/my_wiki -config_file smeagol.toml -index_file Index.md
+//Here, we explicitly tell make_index where the wiki root is, what config file to load when it gets there, and //what file name to use when generating the index files.
+
+//or
+
+$./make_index -wiki_root ~/home/jim/my_wiki
+//Here, we just tell make_index what the root of the wiki is, and accept smeagol.toml as our config file. If it's there, it will set the index file name to the same thing smeagol is using. Otherwise it will revert to my default, which is Index.md. Yes, I'm entirely aware this is different from smeagol's 
 ```
 
-This will recursively dive your Smeagol-Wiki directory tree and create Index.md files in each directory.
 
 ## Features:
 
+make_index's behavior can be changed through the use of flags. It can use a custom config file, or read your smeagol.toml file by default. It can use different names for the index files. And you can call it from some other directory and pass it the root of your wiki. See Option Flags, above.
+
 make_index is multithreaded, using go-routines. Depending on the size of your directory tree, this may speed things up dramatically.
 
-make_index will refrain from clobbering user-generated Index.md files, or in fact any Index.md file which does not contain the YAML tag: AUTOGEN.
+make_index will refrain from clobbering user-generated index files, or in fact any index file which does not contain the YAML tag: AUTOGEN.
 
 make_index understands the following filetypes:
 
@@ -52,44 +92,6 @@ $ go build
 $ cp ./make_index [somewhere on your search path for binaries]
 $ cp ./smeagol.toml [root directory of your smeagol-wiki]
 ```
-
-## How it Works
-
-- Function main() 
-  Location: main.go 
-  
-  We validate the path you passed make_index. Once the path you passed make_index has been validated, main.go calls the gen_index function in gen_index.go and passes it the validated path.
-  
-  Also make sure the program doesn't terminate before the go-routines are all finished.
-  
-  
-
-- Function gen_index(*path* string) 
-  Location: gen_index.go
-  
-  Calls gen_index_preflight with the path gen_index was passed. 
-  
-  If gen_index_preflight returns true, we create a new Index.md file, and iterate through the directory at the end of our path.
-  
-  If we hit an entry that, itself, is another directory, call gen_index as a go-routine (thread) with our path concatinated with the name of this new directory. Then create an anchor link in our Index.md to the Index.md in that new directory, and assume that by the time our new thread completes, there will *be* an Index.md there. 
-  
-  For any other type of file (determined by the dot-extention) we call one of several format_X_link functions to generate the exact text of the link, and write that to Index.md
-  
-  When we run out of entries in the directory at the end of our path, we return.
-  
-
-- Function format_X_link(*file_name* string, [*file_type* string]) 
-  Location: their own .go files.
-  
-  These functions generate the actual link text for each file type. Presently, only format_img_link requires the file_type string. In the future, I may standardize that API. 
-  
-  format_img_link is also special in that it does some logic to check to see whether you've named a given image nsfw_whatever, or just nsfw. If you have, it generates an anchor link, so you have to click to open the image. Any image not so marked will be linked to open as an image in your browser when you load the Index.md file.
-  
-
-- Function gen_index_preflight(*path* string) 
-  Location: gen_index.go
-  
-  If the Index.md file at the path given does not exist, or does exist but has an AUTOGEN tag in its YAML header, return true. Otherwise return false.
 
 ## Notes
 
