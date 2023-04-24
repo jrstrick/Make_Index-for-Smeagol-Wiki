@@ -248,7 +248,7 @@ func gen_index(path string, index_file_name string, wg *sync.WaitGroup) {
 					//without the extension. Panic if the write fails.
 
 				}
-			case "jpg", "gif", "png":
+			case "jpg", "jpeg", "gif", "png":
 				{
 					log.Print(file.Name(), " is an image file.")
 					_, err := io.WriteString(output_file, format_img_link(file_name_type[0], file_name_type[1]))
