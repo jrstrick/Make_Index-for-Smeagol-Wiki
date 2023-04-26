@@ -67,6 +67,7 @@ It will ignore any other files it finds.
 ```bash
 git clone https://github.com/jrstrick/Make_Index-for-Smeagol-Wiki.git
 cd  Make_Index-for-Smeagol-Wiki
+go mod tidy
 go build
 cp ./make_index [somewhere on your search path for binaries]
 cp ./smeagol.toml [root directory of your smeagol-wiki]
