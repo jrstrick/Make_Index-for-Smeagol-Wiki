@@ -6,27 +6,6 @@ Only one little problem. At that time, smeagol's default response, in light of a
 
 This program will go through a directory tree and generate an index file (Index.md, by default) in each subdirectory it finds containing links to all the files in that subdirectory. It will then put links to each index file in each directory in the parent directory's index file, producing a navigable wiki tree.
 
-## BREAKING CHANGES for V0.2
-
-Why breaking changes? On chatting with AustinWise, author of smeagol, he pointed out that this utility could be useful for other things. In order to make make_index more flexible for that purpose, and at the same time better integrated with smeagol, I changed how parameter handling was done and added several parameters. Since my userbase appears to be one (me), this seemed like a good point to make this change.
-
-1. ### The Parameter System Has Changed
-   
-   In the interests of better parameter handling, I switched to Go's flags package instead of parsing the parameters myself the way we did back in the stone age. This did break one feature. Before, you could type
-   
-   \$``make_index /home/jim/mywiki``
-   
-   and make_index would treat the parameter /home/jim/mywiki as the root of the wiki you're trying to index. This no longer works. If you pass make_index parameters this way, they will be ignored.
-   
-   The new way is to type
-   \$``make_index -wiki_root /home/jim/wiki``
-
-2. ### The Default Index File Name Has Changed.
-   
-   By default, make_index now produces README.md files. You can change this, either by passing the -index_file flag on the command line, or by having a smeagol.toml file in your wiki root that sets the index file name —aka index-page—to some other name.
-   
-   If you were using the previous version of make_index with smeagol, you already have that smeagol.toml file specifying Index.md as the index file name so smeagol could find the indexes you created. This will continue to work.
-
 ## To Use:
 
 $ ``make_index [OPTIONS]``
@@ -45,6 +24,7 @@ These flags are all optional. By default, make_index will run in the current dir
 - -config_file specifies the name of the config file to look for in the wiki_root directory.
 - -index_file specifies what make_index should use for its index files, and also what name existing index files will have.
 - -wiki_root specifies the root directory for the wiki. Almost certainly the same place you're pointing smeagol itself.
+- -debug turn the spammy log messages you know and love on. If you don't want them, leave this flag out.
 
 ### Examples
 
