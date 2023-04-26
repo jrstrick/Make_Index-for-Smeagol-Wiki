@@ -11,19 +11,20 @@ This program will go through a directory tree and generate an index file (Index.
 Why breaking changes? On chatting with AustinWise, author of smeagol, he pointed out that this utility could be useful for other things. In order to make make_index more flexible for that purpose, and at the same time better integrated with smeagol, I changed how parameter handling was done and added several parameters. Since my userbase appears to be one (me), this seemed like a good point to make this change.
 
 1. ### The Parameter System Has Changed
-
+   
    In the interests of better parameter handling, I switched to Go's flags package instead of parsing the parameters myself the way we did back in the stone age. This did break one feature. Before, you could type
-
+   
    \$``make_index /home/jim/mywiki``
-
+   
    and make_index would treat the parameter /home/jim/mywiki as the root of the wiki you're trying to index. This no longer works. If you pass make_index parameters this way, they will be ignored.
-
+   
    The new way is to type
    \$``make_index -wiki_root /home/jim/wiki``
+
 2. ### The Default Index File Name Has Changed.
-
+   
    By default, make_index now produces README.md files. You can change this, either by passing the -index_file flag on the command line, or by having a smeagol.toml file in your wiki root that sets the index file name —aka index-page—to some other name.
-
+   
    If you were using the previous version of make_index with smeagol, you already have that smeagol.toml file specifying Index.md as the index file name so smeagol could find the indexes you created. This will continue to work.
 
 ## To Use:
@@ -38,6 +39,7 @@ These flags are all optional. By default, make_index will run in the current dir
 -config_file <filename.toml> default: smeagol.toml, ignored if not found.
 -index_file <filename.md> default: README.md or whatever is in smeagol.toml
 -wiki_root <path name> default: current directory
+-debug
 ```
 
 - -config_file specifies the name of the config file to look for in the wiki_root directory.
@@ -46,13 +48,14 @@ These flags are all optional. By default, make_index will run in the current dir
 
 ### Examples
 
-- $``./make_index -wiki_root ~/home/jim/my_wiki -config_file notsmeagol.toml -index_file Index.md``
+- $``./make_index -wiki_root ~/home/jim/my_wiki -config_file notsmeagol.toml -index_file Index.md -debug``
+  
+  Here, we explicitly tell make_index where the wiki root is,what config file to load when it gets there, and what file name to use when generating the index files, and turn on the very, very chatty debug.
 
-  Here, we explicitly tell make_index where the wiki root is,what config file to load when it gets there, and what file name to use when generating the index files.
 - $``./make_index -wiki_root ~/home/jim/my_wiki``
-
-  Here, we just tell make_index what the root of the wiki is, and accept smeagol.toml as our config file.
-
+  
+  Here, we just tell make_index what the root of the wiki is, and accept smeagol.toml as our config file, and enjoy the peace and quiet without debug.
+  
   If smeagol.toml is present in the wiki root directory, make_index will set the index file name to the same thing smeagol is using. Otherwise it will revert to the default used by smeagol: README.md
 
 ## Features:
@@ -73,7 +76,6 @@ It will ignore any other files it finds.
 
 ## Idiosyncracies:
 
-- make_index is very, very chatty. It's also multithreaded, so the log output may make no sense at all. I should probably provide an off-switch. (Or an on-switch)
 - make_index will choke on any filename with spaces in it. I've found the Linux command "detox" prior to running make_index solves this in a suitably automatic fashion.
 - make_index will ignore any directory whose name is not capitalized. This is so your wiki can have other stuff, like a code directory, without having that directory indexed.
 - make_index will ignore any file type it does not explicitly understand. This means you can have things like smeagol.toml where they need to be and not have them indexed.
@@ -92,6 +94,8 @@ cp ./smeagol.toml [root directory of your smeagol-wiki]
 
 ## Notes
 
+- Q: Wait, where did all the log/debug spam go?
+  A: Pass the flag -debug when calling make_index, and it will be as chatty as you remember.
 - Q : Why Go? Why not Rust?
   A: I'm learning Go for another project because it has a mature graphics toolkit. Rust does not. Go is fast *enough* and safe *enough* for this project.
 - Q: Why do you document your code so much?

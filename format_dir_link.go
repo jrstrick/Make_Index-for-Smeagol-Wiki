@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"log"
+	"make_index/log_wrapper"
 	"strings"
 )
 
@@ -12,7 +12,7 @@ func format_dir_link(f_name string, index_file_name string) string {
 	file in that directory as a string.
 	------------------------------------------------------------*/
 
-	log.Print("format_dir_link. f_name is: ", f_name)
+	log_wrapper.Print("format_dir_link. f_name is: ", f_name)
 
 	file_n_short := strings.ReplaceAll(f_name, "_", " ")
 	//file_n_short is the human-readable filename in the

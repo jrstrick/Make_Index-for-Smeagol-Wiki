@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"log"
+	"make_index/log_wrapper"
 	"strings"
 )
 
@@ -12,7 +12,7 @@ func format_img_link(f_name string, f_type string) string {
 	directory as a string.
 	------------------------------------------------------------*/
 
-	log.Print("format_img_link. f_name is: ", f_name)
+	log_wrapper.Print("format_img_link. f_name is: ", f_name)
 
 	var return_string string
 	file_name_string := fmt.Sprintln(f_name + "." + f_type)

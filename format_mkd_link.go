@@ -2,14 +2,14 @@ package main
 
 import (
 	"fmt"
-	"log"
+	"make_index/log_wrapper"
 	"strings"
 )
 
 func format_mkd_link(f_name string) string {
 	// take a filename, return a markdown_link as a string.
 
-	log.Print("format_mkd_link. f_name is: ", f_name)
+	log_wrapper.Print("format_mkd_link. f_name is: ", f_name)
 
 	file_n_short :=
 		//	strings.Split(

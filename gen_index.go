@@ -2,12 +2,13 @@ package main
 
 import (
 	"io"
-	"log"
 	"os"
 	"sort"
 	"strings"
 	"sync"
 	"unicode"
+
+	"make_index/log_wrapper"
 
 	"github.com/adrg/frontmatter"
 )
@@ -21,9 +22,9 @@ func on_error_die(err error, text string) {
 	if err != nil {
 		//if we have an error...
 
-		log.Fatal("PANIC: "+text+"\n\t Reason: ", err)
-		//call log.Fatal with the text from the function call
-		//and the error itself. The log.Fatal function, in turn,
+		log_wrapper.Fatal("PANIC: "+text+"\n\t Reason: ", err)
+		//call log_wrapper.Fatal with the text from the function call
+		//and the error itself. The log_wrapper.Fatal function, in turn,
 		//calls a panic.
 	}
 
@@ -53,7 +54,7 @@ func gen_index_preflight(path string, index_file_name string) bool {
 		Tags []string `yaml:"tags"`
 	}
 
-	log.Print("gen_index_preflight called at: ", path)
+	log_wrapper.Print("gen_index_preflight called at: ", path)
 	// Log that we're running. This logic has been a PITA.
 
 	file_bytes, file_open_error := os.ReadFile(path + "/" + index_file_name)
@@ -62,7 +63,7 @@ func gen_index_preflight(path string, index_file_name string) bool {
 	if file_open_error == nil {
 		// If we didn't get an error reading the file, it exists.
 
-		log.Print(index_file_name+" exists on ", path)
+		log_wrapper.Print(index_file_name+" exists on ", path)
 		// Log that fact.
 
 		frontmatter.Parse(strings.NewReader(string(file_bytes)), &front_matter)
@@ -72,22 +73,22 @@ func gen_index_preflight(path string, index_file_name string) bool {
 			// This is a sanity check, for file with no tags: tags or no valid YAML
 			// header. If we hit that, we're in unknown waters, so fail the preflight.
 
-			log.Print("Failed preflight: " + index_file_name + " found, but it contains no tags.")
+			log_wrapper.Print("Failed preflight: " + index_file_name + " found, but it contains no tags.")
 			// Log that fact
 
 			return false
 			//return false right now.
 		}
 
-		log.Print("Name:", front_matter.Name, "\nTags:", front_matter.Tags[0])
+		log_wrapper.Print("Name:", front_matter.Name, "\nTags:", front_matter.Tags[0])
 		//Log the first tag in the front_matter.Tags slice. It's the one we care about.
 
 		if front_matter.Tags[0] != "AUTOGEN" {
-			log.Print("No AUTOGEN tag in header")
+			log_wrapper.Print("No AUTOGEN tag in header")
 			//If there's an index_file_name file without an AUTOGEN tag at the beginning
 			//we fail preflight.
 
-			log.Print("Failed preflight: " + index_file_name + " with no AUTOGEN flag.")
+			log_wrapper.Print("Failed preflight: " + index_file_name + " with no AUTOGEN flag.")
 
 			return false
 			//short-circuit the rest of the function and return false right now.
@@ -96,14 +97,14 @@ func gen_index_preflight(path string, index_file_name string) bool {
 			//If we're here, there's an index_file_name file WITH an AUTOGEN tag at the beginning
 			//so we pass preflight.
 
-			log.Print("Passed Preflight. There is an " + index_file_name + ", but it AUTOGEN. Clobber away.")
+			log_wrapper.Print("Passed Preflight. There is an " + index_file_name + ", but it AUTOGEN. Clobber away.")
 		}
 
 	} else {
 		//If we're here, there was no index_file_name file (or some other file error happend. eek)
 		//so we pass preflight. Just fall through to the main return.
 
-		log.Print("No " + index_file_name + " found.")
+		log_wrapper.Print("No " + index_file_name + " found.")
 		//Log that fact.
 
 	}
@@ -141,9 +142,9 @@ func gen_index(path string, index_file_name string, wg *sync.WaitGroup) {
 	Aaaand we're done.
 	--------------------------------------------------------------------*/
 
-	log.Print("gen_index called at path ", path)
+	log_wrapper.Print("gen_index called at path ", path)
 	//Log that we're running. It gets hinky when we're multithreaded.
-	log.Print("index_file_name presently: ", index_file_name)
+	log_wrapper.Print("index_file_name presently: ", index_file_name)
 
 	wg.Add(1)
 	//Increase the waitgroup by 1 for this thread.
@@ -155,7 +156,7 @@ func gen_index(path string, index_file_name string, wg *sync.WaitGroup) {
 	if !gen_index_preflight(path, index_file_name) {
 		// If path contains an index_file_name file that's not tagged AUTOGEN,
 
-		log.Print("Preflight Check Failed:", path+"/"+index_file_name)
+		log_wrapper.Print("Preflight Check Failed:", path+"/"+index_file_name)
 		// Log that fact
 
 		wg.Done()
@@ -179,13 +180,13 @@ func gen_index(path string, index_file_name string, wg *sync.WaitGroup) {
 	on_error_die(err, "Failed writing the header to "+index_file_name+" on path "+path)
 	//write the output file's tags and AUTOGEN header. Panic if we fail.
 
-	log.Print("opened "+index_file_name+" in", path)
+	log_wrapper.Print("opened "+index_file_name+" in", path)
 
 	/*----------------------------------------------------------
 	Populate the index_file_name file
 	-----------------------------------------------------------*/
 
-	log.Print("Passed Preflight Check")
+	log_wrapper.Print("Passed Preflight Check")
 	//Log that fact.
 
 	dir_file_handle, err := os.Open(path)
@@ -209,12 +210,12 @@ func gen_index(path string, index_file_name string, wg *sync.WaitGroup) {
 		file_name_type := strings.Split(file.Name(), ".")
 		//split the filename from the type extention
 
-		log.Print("Processing ", file.Name())
+		log_wrapper.Print("Processing ", file.Name())
 
 		if file.IsDir() {
 			//do all this if we're dealing with a directory.
 
-			log.Print(file.Name(), " is a directory")
+			log_wrapper.Print(file.Name(), " is a directory")
 
 			if (file_name_type[0] != "") &&
 				((unicode.IsUpper(rune(file_name_type[0][0]))) ||
@@ -241,7 +242,7 @@ func gen_index(path string, index_file_name string, wg *sync.WaitGroup) {
 
 			case "md":
 				{
-					log.Print(file.Name(), " is a Markdown file.")
+					log_wrapper.Print(file.Name(), " is a Markdown file.")
 					_, err := io.WriteString(output_file, format_mkd_link(file_name_type[0]))
 					on_error_die(err, "Unable to write markdown Link")
 					//write the markdown file link using the fmt_mkd_link function on the file name
@@ -250,7 +251,7 @@ func gen_index(path string, index_file_name string, wg *sync.WaitGroup) {
 				}
 			case "jpg", "jpeg", "gif", "png":
 				{
-					log.Print(file.Name(), " is an image file.")
+					log_wrapper.Print(file.Name(), " is an image file.")
 					_, err := io.WriteString(output_file, format_img_link(file_name_type[0], file_name_type[1]))
 					on_error_die(err, "Unable to write image Link")
 					//Write the image link using format_image_link and
@@ -260,7 +261,7 @@ func gen_index(path string, index_file_name string, wg *sync.WaitGroup) {
 
 			default:
 				{
-					log.Print(file.Name(), " is in an unsupported format.")
+					log_wrapper.Print(file.Name(), " is in an unsupported format.")
 					//If we get here, we didn't match any known types.
 					//So we don't write any links. Ignore it and move on.
 				}
