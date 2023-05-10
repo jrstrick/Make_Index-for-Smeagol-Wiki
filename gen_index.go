@@ -223,6 +223,7 @@ func gen_index(path string, index_file_name string, wg *sync.WaitGroup) {
 				//filter the directory name and type for sanity.
 				//the name can not be an empty string.
 				//the name must be capitalized or begin with a number.
+				//Also, don't index the Index files.
 
 				go gen_index(path+"/"+file_name_type[0], index_file_name, wg)
 				//new thread with gen_index at this new directory.
@@ -243,8 +244,13 @@ func gen_index(path string, index_file_name string, wg *sync.WaitGroup) {
 			case "md":
 				{
 					log_wrapper.Print(file.Name(), " is a Markdown file.")
-					_, err := io.WriteString(output_file, format_mkd_link(file_name_type[0]))
-					on_error_die(err, "Unable to write markdown Link")
+					if file.Name() != index_file_name {
+						_, err := io.WriteString(output_file, format_mkd_link(file_name_type[0]))
+						on_error_die(err, "Unable to write markdown Link")
+					} else {
+						log_wrapper.Print("Don't write a link to this index file in itself.")
+					}
+					//If the markdown file name is *not* the same as index_file_name,
 					//write the markdown file link using the fmt_mkd_link function on the file name
 					//without the extension. Panic if the write fails.
 
